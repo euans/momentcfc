@@ -56,6 +56,7 @@ component displayname="moment" {
 		part = canonicalizeDatePart( part, 'dateAdd' );
 		this.time = dateAdd( part, amount, this.time );
 		this.utcTime = TZtoUTC( this.time, this.zone );
+		this.localTime = UTCtoTZ( this.utcTime, getSystemTZ() );
 		return this;
 	}
 
@@ -164,7 +165,7 @@ component displayname="moment" {
 				mask = mask;
 		}
 
-		return dateTimeFormat( this.time, mask, this.zone );
+		return dateTimeFormat( this.localtime, mask, this.zone );
 	}
 
 	public function from( required moment compare,  boolean context = true ) hint="returns fuzzy-date string e.g. 2 hours ago" {
@@ -273,11 +274,11 @@ component displayname="moment" {
 		return to( nnow , arguments.context );
 	}
 
-	public function fromTo( required moment compare, boolean context = true ) {
-		return this.isBefore( arguments.compare ) ? from( argumentCollection = arguments ) : to( argumentCollection = arguments );
+	public function relativeTo( required moment compare, boolean context = true ) {
+		return this.isBefore( arguments.compare ) ? to( argumentCollection = arguments ) : from( argumentCollection = arguments );
 	}
 
-	public function fromToNow( boolean context = true ) {
+	public function relativeToNow( boolean context = true ) {
 		var nnow = new moment().clone().utc();
 		return fromTo( nnow, arguments.context );
 	}
@@ -451,6 +452,7 @@ component displayname="moment" {
 		this.time = createDateTime( dateStruct.yyyy, dateStruct.m, dateStruct.d, dateStruct.h, dateStruct.n, dateStruct.s );
 		this.time = dateAdd('l', dateStruct.l, this.time);
 		this.utcTime = TZtoUTC( this.time, this.zone );
+		this.localTime = UTCtoTZ( this.utcTime, getSystemTZ() );
 
 		return this;
 	}

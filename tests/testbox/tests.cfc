@@ -599,6 +599,10 @@ component extends="testbox.system.BaseSpec" {
 		describe("TERMINATORS", function(){
 
 			describe("format()", function(){
+				it("formats modified dates", function(){
+					expect( moment().clone().add( 1, 'd' ).format('d') ).toBe( day(dateAdd('d', 1, now())) );
+				});
+
 				it("formats standard masks correctly across time zones", function(){
 					var testZones = [
 						{
@@ -754,6 +758,120 @@ component extends="testbox.system.BaseSpec" {
 
 			describe("fromNow()", function(){
 				it("is just a wrapper for from, so it gets a pass",function(){});
+			});
+
+			describe("to()", function(){
+				var base = moment();
+
+				it("detects multiple years", function(){
+					var test = base.clone().add( 3, 'years' ).add( 3, 'weeks' );
+					var test2 = base.clone().add( 3, 'years' ).subtract( 3, 'weeks' );
+					expect( test.to( base ) ).toBe( 'in 3 years' );
+				});
+
+				it("detects single years", function(){
+					var test = base.clone().add( 1, 'year' ).add( 3, 'weeks' );
+					var test2 = base.clone().add( 1, 'year' ).subtract( 3, 'weeks' );
+					expect( test.to( base ) ).toBe( 'Next year' );
+				});
+
+				it("detects multiple months", function(){
+					var test = base.clone().add( 8, 'months' ).add( 3, 'days' );
+					var test2 = base.clone().add( 8, 'months' ).subtract( 3, 'days' );
+					expect( test.to( base ) ).toBe( 'in 8 months' );
+				});
+
+				it("detects single months", function(){
+					var test = base.clone().add( 1, 'months' ).add( 3, 'days' );
+					var test2 = base.clone().add( 1, 'months' ).subtract( 3, 'days' );
+					expect( test.to( base ) ).toBe( 'in 1 month' );
+				});
+
+				it("detects multiple weeks", function(){
+					var test = base.clone().add( 3, 'weeks' ).add( 2, 'hours' );
+					var test2 = base.clone().add( 3, 'weeks' ).subtract( 2, 'hours' );
+					expect( test.to( base ) ).toBe( 'in 3 weeks' );
+				});
+
+				it("detects single weeks", function(){
+					var test = base.clone().add( 1, 'weeks' ).add( 2, 'hours' );
+					var test2 = base.clone().add( 1, 'weeks' ).subtract( 2, 'hours' );
+					expect( test.to( base ) ).toBe( 'Next week' );
+				});
+				
+				it("detects tomorrow", function(){
+					var test = base.clone().add( 1, 'days' );
+					expect( test.to( base ) ).toBe( 'Tomorrow' );
+				});
+
+				it("detects days", function(){
+					var test = base.clone().add( 4, 'days' ).add( 2, 'hours' );
+					var test2 = base.clone().add( 4, 'days' ).subtract( 2, 'hours' );
+					expect( right(test.to( base ), 3) ).toBe( 'day' );
+				});
+
+				it("detects days in next week", function(){
+					var test = base.clone().add( 6, 'days' );
+					expect( left(test.to( base ), 4) ).toBe( 'Next' );
+				});
+
+				it("detects multiple hours", function(){
+					var test = base.clone().add( 4, 'hours' ).add( 15, 'minutes' );
+					var test2 = base.clone().add( 4, 'hours' ).subtract( 15, 'minutes' );
+					expect( test.to( base ) ).toBe( 'in 4 hours' );
+				});
+
+				it("detects single hours", function(){
+					var test = base.clone().add( 1, 'hours' ).add( 15, 'minutes' );
+					var test2 = base.clone().add( 1, 'hours' ).subtract( 15, 'minutes' );
+					expect( test.to( base ) ).toBe( 'in 1 hour' );
+				});
+
+				it("detects multiple minutes", function(){
+					var test = base.clone().add( 10, 'minutes' ).add( 15, 'seconds' );
+					var test2 = base.clone().add( 10, 'minutes' ).subtract( 15, 'seconds' );
+					expect( test.to( base ) ).toBe( 'in 10 minutes' );
+				});
+
+				it("detects single minutes", function(){
+					var test = base.clone().add( 1, 'minute' ).add( 15, 'seconds' );
+					expect( test.to( base ) ).toBe( 'in 1 minute' );
+				});
+
+				it("detects seconds", function(){
+					var test = base.clone().add( 20, 'seconds' ).add( 100, 'ms' );
+					var test2 = base.clone().add( 20, 'seconds' ).subtract( 100, 'ms' );
+					expect( test.to( base ) ).toBe( 'in 20 seconds' );
+				});
+
+				it("detects now", function(){
+					var test = base.clone();
+					expect( test.to( base ) ).toBe( 'Now' );
+				});
+			});
+			
+			describe("relativeTo()", function(){
+				var base = moment();
+				
+				it("detects past source with future compare", function(){
+					var test = base.clone().subtract(3, 'hours');
+					expect( test.relativeTo( base.clone() ) ).toBe( 'in 3 hours' );
+				});
+
+				it("detects future source with past compare", function(){
+					var test = base.clone();
+					expect( test.relativeTo( base.clone().subtract(3, 'hours') ) ).toBe( '3 hours ago' );
+				});
+
+				it("detects source eq to compare", function(){
+					var test = base.clone();
+					expect( test.relativeTo( base.clone() ) ).toBe( 'Just Now' );
+				});
+
+				it("detects context", function(){
+					var test = base.clone();
+					expect( test.relativeTo( base.clone().subtract(3, 'hours'), false ) ).toBe( '3 hours' );
+				});
 			});
 
 			describe("epoch()", function(){
