@@ -1,2 +1,4 @@
 tests/results/output.txt
 tests/results/testbox.properties
+/.gitignore
+/index.cfm

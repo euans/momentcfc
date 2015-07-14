@@ -182,9 +182,9 @@ component displayname="moment" {
 		}
 	}
 
-	public function fromNow() {
+	public function fromNow( boolean prefix = true ) {
 		var nnow = new moment().clone().utc();
-		return from( nnow );
+		return from( nnow, arguments.prefix );
 	}
 
 	public function epoch() hint="returns the number of milliseconds since 1/1/1970 (local). Call .utc() first to get utc epoch" {
