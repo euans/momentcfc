@@ -139,7 +139,7 @@ component displayname="moment" {
 		return dateTimeFormat( this.localTime, mask, this.zone );
 	}
 
-	public function from( required moment compare ) hint="returns fuzzy-date string e.g. 2 hours ago" {
+	public function from( required moment compare,  boolean suffix = true ) hint="returns fuzzy-date string e.g. 2 hours ago" {
 		var base = this.clone().utc();
 		var L = this.min( base, compare.clone().utc() ).getDateTime();
 		var R = this.max( base, compare.clone().utc() ).getDateTime();
@@ -151,12 +151,12 @@ component displayname="moment" {
 		//Minutes
 		diff = dateDiff('n', L, R);
 		if (diff < 60){
-			return diff & " minute#(diff gt 1 ? 's' : '')# ago";
+			return diff & " minute#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
 		}
 		//Hours
 		diff = dateDiff('h', L, R);
 		if (diff < 24){
-			return diff & " hour#(diff gt 1 ? 's' : '')# ago";
+			return diff & " hour#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
 		}
 		//Days
 		diff = dateDiff('d', L, R);
@@ -168,17 +168,17 @@ component displayname="moment" {
 		if (diff == 1){
 			return 'Last week';
 		}else if (diff lt 4){
-			return diff & ' weeks ago';
+			return diff & ' weeks#arguments.suffix ? ' ago' : ''#';
 		}
 		//Months/Years
 		diff = dateDiff('m', L, R);
 		if (diff < 12){
-			return diff & " month#(diff gt 1 ? 's' : '')# ago";
+			return diff & " month#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
 		}else if (diff == 12){
 			return 'Last year';
 		}else{
 			diff = dateDiff('yyyy', L, R);
-			return diff & " year#(diff gt 1 ? 's' : '')# ago";
+			return diff & " year#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
 		}
 	}
 
