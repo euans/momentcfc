@@ -139,7 +139,7 @@ component displayname="moment" {
 		return dateTimeFormat( this.time, mask, this.zone );
 	}
 
-	public function from( required moment compare,  boolean suffix = true ) hint="returns fuzzy-date string e.g. 2 hours ago" {
+	public function from( required moment compare,  boolean context = true ) hint="returns fuzzy-date string e.g. 2 hours ago" {
 		var base = this.clone().utc();
 		var L = this.min( base, compare.clone().utc() ).getDateTime();
 		var R = this.max( base, compare.clone().utc() ).getDateTime();
@@ -151,12 +151,12 @@ component displayname="moment" {
 		//Minutes
 		diff = dateDiff('n', L, R);
 		if (diff < 60){
-			return diff & " minute#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
+			return diff & " minute#(diff gt 1 ? 's' : '')##arguments.context ? ' ago' : ''#";
 		}
 		//Hours
 		diff = dateDiff('h', L, R);
 		if (diff < 24){
-			return diff & " hour#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
+			return diff & " hour#(diff gt 1 ? 's' : '')##arguments.context ? ' ago' : ''#";
 		}
 		//Days
 		diff = dateDiff('d', L, R);
@@ -168,26 +168,26 @@ component displayname="moment" {
 		if (diff == 1){
 			return 'Last week';
 		}else if (diff lt 4){
-			return diff & ' weeks#arguments.suffix ? ' ago' : ''#';
+			return diff & ' weeks#arguments.context ? ' ago' : ''#';
 		}
 		//Months/Years
 		diff = dateDiff('m', L, R);
 		if (diff < 12){
-			return diff & " month#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
+			return diff & " month#(diff gt 1 ? 's' : '')##arguments.context ? ' ago' : ''#";
 		}else if (diff == 12){
 			return 'Last year';
 		}else{
 			diff = dateDiff('yyyy', L, R);
-			return diff & " year#(diff gt 1 ? 's' : '')##arguments.suffix ? ' ago' : ''#";
+			return diff & " year#(diff gt 1 ? 's' : '')##arguments.context ? ' ago' : ''#";
 		}
 	}
 
-	public function fromNow( boolean prefix = true ) {
+	public function fromNow( boolean context = true ) {
 		var nnow = new moment().clone().utc();
-		return from( nnow, arguments.prefix );
+		return from( nnow, arguments.context );
 	}
 
-	public function to( required moment compare,  boolean prefix = true ) hint="returns fuzzy-date string for future date e.g. in 2 hours" {
+	public function to( required moment compare,  boolean context = true ) hint="returns fuzzy-date string for future date e.g. in 2 hours" {
 		var base = this.clone().utc();
 		var L = this.min( base, compare.clone().utc() ).getDateTime();
 		var R = this.max( base, compare.clone().utc() ).getDateTime();
@@ -198,17 +198,17 @@ component displayname="moment" {
 			return 'Now';
 		}
 		if (diff < 60){
-			return (arguments.prefix ? 'in ' : '') & diff & "second#(diff gt 1 ? 's' : '')#";
+			return (arguments.context ? 'in ' : '') & diff & "second#(diff gt 1 ? 's' : '')#";
 		}
 		//Minutes
 		diff = dateDiff('n', L, R);
 		if (diff < 60){
-			return (arguments.prefix ? 'in ' : '') & diff & "minute#(diff gt 1 ? 's' : '')#";
+			return (arguments.context ? 'in ' : '') & diff & "minute#(diff gt 1 ? 's' : '')#";
 		}
 		//Hours
 		diff = dateDiff('h', L, R);
 		if (diff < 24){
-			return (arguments.prefix ? 'in ' : '') & diff & " hour#(diff gt 1 ? 's' : '')#";
+			return (arguments.context ? 'in ' : '') & diff & " hour#(diff gt 1 ? 's' : '')#";
 		}
 		//Days
 		diff = dateDiff('d', L, R);
@@ -220,23 +220,27 @@ component displayname="moment" {
 		if (diff == 1){
 			return 'Next week';
 		}else if (diff lt 4){
-			return (arguments.prefix ? 'in ' : '') & diff & ' weeks';
+			return (arguments.context ? 'in ' : '') & diff & ' weeks';
 		}
 		//Months/Years
 		diff = dateDiff('m', L, R);
 		if (diff < 12){
-			return (arguments.prefix ? 'in ' : '') & diff & " month#(diff gt 1 ? 's' : '')#";
+			return (arguments.context ? 'in ' : '') & diff & " month#(diff gt 1 ? 's' : '')#";
 		}else if (diff == 12){
 			return 'Next year';
 		}else{
 			diff = dateDiff('yyyy', L, R);
-			return (arguments.prefix ? 'in ' : '') & diff & " year#(diff gt 1 ? 's' : '')#";
+			return (arguments.context ? 'in ' : '') & diff & " year#(diff gt 1 ? 's' : '')#";
 		}
 	}
 
-	public function toNow( boolean prefix = true ) {
+	public function toNow( boolean context = true ) {
 		var nnow = new moment().clone().utc();
-		return to( nnow , arguments.prefix );
+		return to( nnow , arguments.context );
+	}
+
+	public function fromTo( required moment compare, boolean context = true ) {
+		return this.isBefore( arguments.compare ) ? from( argumentCollection = arguments ) : to( argumentCollection = arguments );
 	}
 
 	public function epoch() hint="returns the number of milliseconds since 1/1/1970 (local). Call .utc() first to get utc epoch" {
