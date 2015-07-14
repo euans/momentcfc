@@ -136,7 +136,7 @@ component displayname="moment" {
 				mask = mask;
 		}
 
-		return dateTimeFormat( this.localTime, mask, this.zone );
+		return dateTimeFormat( this.time, mask, this.zone );
 	}
 
 	public function from( required moment compare,  boolean suffix = true ) hint="returns fuzzy-date string e.g. 2 hours ago" {
