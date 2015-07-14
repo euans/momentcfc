@@ -141,6 +141,33 @@ Shorthand for calling `to` when one of the comparators ~= `now()`.
 	x.toNow( true )
 	//=> 6 years
 
+#### fromTo
+
+Fuzzy time difference description between the two moments. If the source moment is greater than the compare moment, the from() method is used, otherwise the to() method is used:
+
+	x = new moment( '2020-11-27' );
+	y = new moment();
+
+	y.fromTo( x );
+	//=> in 6 years
+
+	x.fromTo( y );
+	//=> 6 years ago
+
+	x.fromTo( y, true )
+	//=> 6 years
+
+#### fromToNow
+
+Shorthand for calling `fromTo` when one of the comparators ~= `now()`.
+
+	x = new moment( '2020-11-27' );
+	x.fromToNow();
+	//=> in 6 years
+
+	x.fromTo( true )
+	//=> 6 years
+
 #### Epoch
 
 Get your moment in its unix epoch format: milliseconds since 1970-01-01.
