@@ -63,6 +63,34 @@ component displayname="moment" {
 		return add( -1 * amount, part );
 	}
 
+	public function year( value = '' ) hint = "set/get year" {
+		return val( arguments.value )? setDatePart( 'yyyy', arguments.value ) : getDatePart( 'yyyy' );
+	}
+
+	public function month( value = '' ) hint = "set/get month" {
+		return val( arguments.value )? setDatePart( 'm', arguments.value ) : getDatePart( 'm' );
+	}
+
+	public function day( value = '' ) hint = "set/get day" {
+		return val( arguments.value )? setDatePart( 'd', arguments.value ) : getDatePart( 'd' );
+	}
+
+	public function hour( value = '' ) hint = "set/get hour" {
+		return val( arguments.value )? setDatePart( 'h', arguments.value ) : getDatePart( 'h' );
+	}
+
+	public function minute( value = '' ) hint = "set/get minute" {
+		return val( arguments.value )? setDatePart( 'n', arguments.value ) : getDatePart( 'n' );
+	}
+
+	public function second( value = '' ) hint = "set/get second" {
+		return val( arguments.value )? setDatePart( 's', arguments.value ) : getDatePart( 's' );
+	}
+
+	public function millisecond( value = '' ) hint = "set/get Millisecond" {
+		return val( arguments.value )? setDatePart( 'l', arguments.value ) : getDatePart( 'l' );
+	}
+
 	//===========================================
 	//STATICS
 	//===========================================
@@ -346,6 +374,7 @@ component displayname="moment" {
 		switch( lcase(arguments.part) ){
 			case 'years':
 			case 'year':
+			case 'yyyy':
 			case 'y':
 				return 'yyyy';
 			case 'quarters':
@@ -386,6 +415,7 @@ component displayname="moment" {
 			case 'milliseconds':
 			case 'millisecond':
 			case 'ms':
+			case 'l':
 				if (isDateAdd) return 'L';
 				if (isDateDiff) return 'L'; //custom support for ms diffing is provided interally, because adobe sucks
 				throw(message='#method# doesn''t support Millisecond precision');
@@ -397,6 +427,32 @@ component displayname="moment" {
 		var startOffset = getArbitraryTimeOffset( time, sourceTZ );
 		var targetOffset = getArbitraryTimeOffset( time, destTZ );
 		return (targetOffset - startOffset) * 1000;
+	}
+
+	private function getDatePart( required string datepart ) hint="used to get the date/time parts" {
+		var part = canonicalizeDatePart( arguments.datepart );
+
+		return datePart( part, this.time );
+	}
+
+	private function setDatePart( required string datepart, value ) hint="used to set the date/time parts" {
+		var part   = canonicalizeDatePart( arguments.datepart );
+		var dateStruct = {
+			yyyy = getDatePart( 'yyyy' ),
+			m    = getDatePart( 'm' ),
+			d    = getDatePart( 'd' ),
+			h    = getDatePart( 'h' ),
+			n    = getDatePart( 'n' ),
+			s    = getDatePart( 's' ),
+			l    = getDatePart( 'l' )
+		};
+		dateStruct[part] = val( arguments.value );
+
+		this.time = createDateTime( dateStruct.yyyy, dateStruct.m, dateStruct.d, dateStruct.h, dateStruct.n, dateStruct.s );
+		this.time = dateAdd('l', dateStruct.l, this.time);
+		this.utcTime = TZtoUTC( this.time, this.zone );
+
+		return this;
 	}
 
 }
