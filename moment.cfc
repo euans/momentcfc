@@ -146,7 +146,7 @@ component displayname="moment" {
 		var diff = 0;
 		//Seconds
 		if (dateDiff('s', L, R) < 60){
-			return 'Just now';
+			return "Just now";
 		}
 		//Minutes
 		diff = dateDiff('n', L, R);
@@ -161,21 +161,21 @@ component displayname="moment" {
 		//Days
 		diff = dateDiff('d', L, R);
 		if (diff < 7){
-			return 'Last ' & dateTimeFormat(L, 'EEEE');
+			return "Last " & dateTimeFormat(L, 'EEEE');
 		}
 		//Weeks
 		diff = dateDiff('ww', L, R);
 		if (diff == 1){
-			return 'Last week';
+			return "Last week";
 		}else if (diff lt 4){
-			return diff & ' weeks#arguments.context ? ' ago' : ''#';
+			return diff & " weeks#arguments.context ? ' ago' : ''#";
 		}
 		//Months/Years
 		diff = dateDiff('m', L, R);
 		if (diff < 12){
 			return diff & " month#(diff gt 1 ? 's' : '')##arguments.context ? ' ago' : ''#";
 		}else if (diff == 12){
-			return 'Last year';
+			return "Last year";
 		}else{
 			diff = dateDiff('yyyy', L, R);
 			return diff & " year#(diff gt 1 ? 's' : '')##arguments.context ? ' ago' : ''#";
@@ -195,15 +195,15 @@ component displayname="moment" {
 		//Seconds
 		diff = dateDiff('s', L, R);
 		if (diff == 0){
-			return 'Now';
+			return "Now";
 		}
 		if (diff < 60){
-			return (arguments.context ? 'in ' : '') & diff & "second#(diff gt 1 ? 's' : '')#";
+			return (arguments.context ? 'in ' : '') & diff & " second#(diff gt 1 ? 's' : '')#";
 		}
 		//Minutes
 		diff = dateDiff('n', L, R);
 		if (diff < 60){
-			return (arguments.context ? 'in ' : '') & diff & "minute#(diff gt 1 ? 's' : '')#";
+			return (arguments.context ? 'in ' : '') & diff & " minute#(diff gt 1 ? 's' : '')#";
 		}
 		//Hours
 		diff = dateDiff('h', L, R);
@@ -212,22 +212,28 @@ component displayname="moment" {
 		}
 		//Days
 		diff = dateDiff('d', L, R);
-		if (diff < 7){
+		if (diff == 1){
+			return "Tomorrow";
+		}
+		if (diff < 7 && dayOfWeek(R) <= dayOfWeek(L)){
+			return "Next " & dateTimeFormat(R, 'EEEE');
+		}
+		else if (diff < 7){
 			return dateTimeFormat(R, 'EEEE');
 		}
 		//Weeks
 		diff = dateDiff('ww', L, R);
 		if (diff == 1){
-			return 'Next week';
+			return "Next week";
 		}else if (diff lt 4){
-			return (arguments.context ? 'in ' : '') & diff & ' weeks';
+			return (arguments.context ? 'in ' : '') & diff & " weeks";
 		}
 		//Months/Years
 		diff = dateDiff('m', L, R);
 		if (diff < 12){
 			return (arguments.context ? 'in ' : '') & diff & " month#(diff gt 1 ? 's' : '')#";
 		}else if (diff == 12){
-			return 'Next year';
+			return "Next year";
 		}else{
 			diff = dateDiff('yyyy', L, R);
 			return (arguments.context ? 'in ' : '') & diff & " year#(diff gt 1 ? 's' : '')#";
@@ -241,6 +247,11 @@ component displayname="moment" {
 
 	public function fromTo( required moment compare, boolean context = true ) {
 		return this.isBefore( arguments.compare ) ? from( argumentCollection = arguments ) : to( argumentCollection = arguments );
+	}
+
+	public function fromToNow( boolean context = true ) {
+		var nnow = new moment().clone().utc();
+		return fromTo( nnow, arguments.context );
 	}
 
 	public function epoch() hint="returns the number of milliseconds since 1/1/1970 (local). Call .utc() first to get utc epoch" {
