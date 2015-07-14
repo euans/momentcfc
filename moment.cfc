@@ -187,6 +187,58 @@ component displayname="moment" {
 		return from( nnow, arguments.prefix );
 	}
 
+	public function to( required moment compare,  boolean prefix = true ) hint="returns fuzzy-date string for future date e.g. in 2 hours" {
+		var base = this.clone().utc();
+		var L = this.min( base, compare.clone().utc() ).getDateTime();
+		var R = this.max( base, compare.clone().utc() ).getDateTime();
+		var diff = 0;
+		//Seconds
+		diff = dateDiff('s', L, R);
+		if (diff == 0){
+			return 'Now';
+		}
+		if (diff < 60){
+			return (arguments.prefix ? 'in ' : '') & diff & "second#(diff gt 1 ? 's' : '')#";
+		}
+		//Minutes
+		diff = dateDiff('n', L, R);
+		if (diff < 60){
+			return (arguments.prefix ? 'in ' : '') & diff & "minute#(diff gt 1 ? 's' : '')#";
+		}
+		//Hours
+		diff = dateDiff('h', L, R);
+		if (diff < 24){
+			return (arguments.prefix ? 'in ' : '') & diff & " hour#(diff gt 1 ? 's' : '')#";
+		}
+		//Days
+		diff = dateDiff('d', L, R);
+		if (diff < 7){
+			return dateTimeFormat(R, 'EEEE');
+		}
+		//Weeks
+		diff = dateDiff('ww', L, R);
+		if (diff == 1){
+			return 'Next week';
+		}else if (diff lt 4){
+			return (arguments.prefix ? 'in ' : '') & diff & ' weeks';
+		}
+		//Months/Years
+		diff = dateDiff('m', L, R);
+		if (diff < 12){
+			return (arguments.prefix ? 'in ' : '') & diff & " month#(diff gt 1 ? 's' : '')#";
+		}else if (diff == 12){
+			return 'Next year';
+		}else{
+			diff = dateDiff('yyyy', L, R);
+			return (arguments.prefix ? 'in ' : '') & diff & " year#(diff gt 1 ? 's' : '')#";
+		}
+	}
+
+	public function toNow( boolean prefix = true ) {
+		var nnow = new moment().clone().utc();
+		return to( nnow , arguments.prefix );
+	}
+
 	public function epoch() hint="returns the number of milliseconds since 1/1/1970 (local). Call .utc() first to get utc epoch" {
 		/*
 			It seems that we can't get CF to give us an actual UTC datetime object without using DateConvert(), which we
