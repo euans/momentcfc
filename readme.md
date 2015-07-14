@@ -100,6 +100,9 @@ Fuzzy time difference description between the two moments, **always** phrased in
 	y.from( x );
 	//=> 6 years ago
 
+	x.from( x, true )
+	//=> 6 years	
+
 #### FromNow
 
 Shorthand for calling `from` when one of the comparators ~= `now()`.
@@ -107,6 +110,36 @@ Shorthand for calling `from` when one of the comparators ~= `now()`.
 	x = new moment( '2008-11-27' );
 	x.fromNow();
 	//=> 6 years ago
+
+	x.fromNow( true )
+	//=> 6 years	
+
+#### To
+
+Fuzzy time difference description between the two moments, **always** phrased in future tense:
+
+	x = new moment( '2020-11-27' );
+	y = new moment();
+
+	x.to( y );
+	//=> in 6 years
+
+	y.to( x );
+	//=> in 6 years
+
+	x.toNow( x, true )
+	//=> 6 years
+
+#### toNow
+
+Shorthand for calling `to` when one of the comparators ~= `now()`.
+
+	x = new moment( '2020-11-27' );
+	x.toNow();
+	//=> in 6 years
+
+	x.toNow( true )
+	//=> 6 years
 
 #### Epoch
 
