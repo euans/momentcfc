@@ -196,7 +196,7 @@ component displayname="moment" {
 		diff = dateDiff('ww', L, R);
 		if (diff == 1){
 			return "Last week";
-		}else if (diff lt 4){
+		}else if (diff lte 4){
 			return diff & " weeks#arguments.context ? ' ago' : ''#";
 		}
 		//Months/Years
