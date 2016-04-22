@@ -290,10 +290,7 @@ component displayname="moment" {
 			devised a system of detecting the target time zone's offset and using it here (the only place it seems necessary)
 			to return the expected epoch values.
 		*/
-		return this.clone().getDateTime().getTime() - this.utc_conversion_offset;
-		var adjustment = (this.utc_conversion_offset > 0) ? -1 : 1;
-		return this.clone().getDateTime().getTime();
-		return this.clone().getDateTime().getTime() - (this.utc_conversion_offset * adjustment);
+		return javaCast('long', this.clone().getDateTime().getTime() - this.utc_conversion_offset);
 	}
 
 	public function getDateTime() hint="return raw datetime object in current zone" {
