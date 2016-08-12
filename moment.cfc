@@ -26,7 +26,11 @@ component displayname="moment" {
 				-- for instance initialized to someTimeValue in someTZID TZ
 	*/
 	public function init( time = now(), zone = getSystemTZ() ) {
-		this.time = (time contains '{ts') ? time : parseDateTime( arguments.time );
+		if (isNumeric(time))
+			this.time = epochToDate(arguments.time);
+		else
+			this.time = (time contains '{ts') ? time : parseDateTime( arguments.time );
+
 		this.zone = zone;
 		this.utc_conversion_offset = getTargetOffsetDiff( getSystemTZ(), zone, time );
 		this.utcTime = TZtoUTC( arguments.time, arguments.zone );
@@ -64,6 +68,78 @@ component displayname="moment" {
 		return add( -1 * amount, part );
 	}
 
+	public function startOf( required string part ){
+		part = canonicalizeDatePart(part, "startOf");
+		var dest = '';
+
+		switch (part){
+			case 'year':
+				dest = createDateTime(year(this.localTime),1,1,0,0,0);
+				break;
+			case 'quarter':
+				dest = createDateTime(year(this.localTime),(int((month(this.localTime)-1)/3)+1)*3-2,1,0,0,0);
+				break;
+			case 'month':
+				dest = createDateTime(year(this.localTime),month(this.localTime),1,0,0,0);
+				break;
+			case 'week':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),0,0,0);
+				dest = dateAdd("d", (dayOfWeek(dest)-1)*-1, dest);
+				break;
+			case 'day':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),0,0,0);
+				break;
+			case 'hour':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),hour(this.localTime),0,0);
+				break;
+			case 'minute':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),hour(this.localTime),minute(this.localTime),0);
+				break;
+			default:
+				throw(message="Invalid date part value, expected one of: year, quarter, month, week, day, hour, minute; or one of their acceptable aliases (see dateTimeFormat docs)");
+		}
+
+		return init( dest, this.zone );
+	}
+
+	public function endOf(required string part) {
+		part = canonicalizeDatePart(part, "startOf");
+
+		var dest = '';
+		switch (part){
+			case 'year':
+				dest = createDateTime(year(this.localTime),12,31,23,59,59);
+				break;
+			case 'quarter':
+				dest = createDateTime(year(this.localTime),(int((month(this.localTime)-1)/3)+1)*3,1,23,59,59); //first day of last month of quarter (e.g. 12/1)
+				dest = dateAdd('m', 1, dest); //first day of following month
+				dest = dateAdd('d', -1, dest); //last day of last month of quarter
+				break;
+			case 'month':
+				dest = createDateTime(year(this.localTime),month(this.localTime),1,23,59,59); //first day of month
+				dest = dateAdd('m', 1, dest); //first day of following month
+				dest = dateAdd('d', -1, dest); //last day of target month
+				break;
+			case 'week':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),23,59,59);
+				dest = dateAdd("d", (7-dayOfWeek(dest)), dest);
+				break;
+			case 'day':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),23,59,59);
+				break;
+			case 'hour':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),hour(this.localTime),59,59);
+				break;
+			case 'minute':
+				dest = createDateTime(year(this.localTime),month(this.localTime),day(this.localTime),hour(this.localTime),minute(this.localTime),59);
+				break;
+			default:
+				throw(message="Invalid date part value, expected one of: year, quarter, month, week, day, hour, minute; or one of their acceptable aliases (see dateTimeFormat docs)");
+		}
+
+		return init( dest, this.zone );
+	}
+	
 	public function year( value = '' ) hint = "set/get year" {
 		return val( arguments.value )? setDatePart( 'yyyy', arguments.value ) : getDatePart( 'yyyy' );
 	}
@@ -337,7 +413,17 @@ component displayname="moment" {
 	//===========================================
 	//INTERNAL HELPERS
 	//===========================================
+	
+	private function epochToDate( epoch ){
+		var d = "";
+		if (isValid("integer",arguments.epoch))
+			d = createObject("java","java.util.Date").init(javacast("long",arguments.epoch*1000));
+		else if (isNumeric(arguments.epoch) and val(arguments.epoch) gt 1000)
+			d = createObject("java","java.util.Date").init(javacast("long",arguments.epoch));
 
+		return d;
+	}
+	
 	private function getSystemTimeMS(){
 		return createObject('java', 'java.lang.System').currentTimeMillis();
 	}
@@ -368,30 +454,36 @@ component displayname="moment" {
 		var isDateAdd = (lcase(method) == 'dateadd');
 		var isDateDiff = (lcase(method) == 'datediff');
 		var isDateCompare = (lcase(method) == 'datecompare');
+		var isStartOf = (lcase(method) == 'startof');
 
 		switch( lcase(arguments.part) ){
 			case 'years':
 			case 'year':
 			case 'yyyy':
 			case 'y':
+				if (isStartOf) return 'year';
 				return 'yyyy';
 			case 'quarters':
 			case 'quarter':
 			case 'q':
+				if (isStartOf) return 'quarter';
 				if (!isDateCompare) return 'q';
 				throw(message='DateCompare doesn''t support Quarter precision');
 			case 'months':
 			case 'month':
 			case 'm':
+				if (isStartOf) return 'month';
 				return 'm';
 			case 'weeks':
 			case 'week':
 			case 'w':
+				if (isStartOf) return 'week';
 				if (!isDateCompare) return 'ww';
 				throw(message='DateCompare doesn''t support Week precision');
 			case 'days':
 			case 'day':
 			case 'd':
+				if (isStartOf) return 'day';
 				return 'd';
 			case 'weekdays':
 			case 'weekday':
@@ -401,19 +493,22 @@ component displayname="moment" {
 			case 'hours':
 			case 'hour':
 			case 'h':
+				if (isStartOf) return 'hour';
 				return 'h';
 			case 'minutes':
 			case 'minute':
 			case 'n':
+				if (isStartOf) return 'minute';
 				return 'n';
 			case 'seconds':
 			case 'second':
 			case 's':
+				if (isStartOf) return 'second';
 				return 's';
 			case 'milliseconds':
 			case 'millisecond':
 			case 'ms':
-			case 'l':
+				if (isStartOf) return 'millisecond';
 				if (isDateAdd) return 'L';
 				if (isDateDiff) return 'L'; //custom support for ms diffing is provided interally, because adobe sucks
 				throw(message='#method# doesn''t support Millisecond precision');
