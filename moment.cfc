@@ -266,12 +266,16 @@ component displayname="moment" {
 		//Days
 		diff = dateDiff('d', L, R);
 		if (diff < 7){
-			return "Last " & dateTimeFormat(L, 'EEEE');
+			if (diff < 2){
+				return 'Yesterday';
+			}else if (diff >= 2){
+				return diff & ' days ago';
+			}
 		}
 		//Weeks
 		diff = dateDiff('ww', L, R);
 		if (diff == 1){
-			return "Last week";
+			return '1 week ago';
 		}else if (diff lte 4){
 			return diff & " weeks#arguments.context ? ' ago' : ''#";
 		}
@@ -402,7 +406,12 @@ component displayname="moment" {
 
 	public boolean function isBetween( required moment a, required moment c, part = 'seconds' ) {
 		part = canonicalizeDatePart( part, 'dateCompare' );
-		return ( isBefore(c, part) && isAfter(a, part) );
+		if ( isBefore(c, part) && isAfter(a, part) ){
+			return true;
+		}else if ( isBefore(a, part) && isAfter(c, part) ){
+			return true;
+		}
+		return false;
 	}
 
 	public boolean function isDST() {
